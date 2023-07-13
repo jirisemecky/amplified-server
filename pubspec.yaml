@@ -1,0 +1,25 @@
+name: amplified_server
+description: A server amplifying user voices
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.0.5
+
+dependencies:
+  path: ^1.8.0
+  pinecone: ^0.4.1
+  args: ^2.3.0
+  shelf: ^1.4.0
+  envied: ^0.3.0+3
+  envify:
+  shelf_router: ^1.1.0
+  dart_openai: ^3.0.0
+
+dev_dependencies:
+  http: ^0.13.0
+  lints: ^2.0.0
+  test: ^1.21.0
+  envied_generator: ^0.3.0+3
+  build_runner: ^2.4.6
+  build_web_compilers: ^4.0.4
