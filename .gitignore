@@ -3,3 +3,5 @@
 .dart_tool/
 bin/.env
 bin/env.g.dart
+.idea
+pubspec.lock
