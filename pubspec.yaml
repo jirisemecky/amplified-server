@@ -1,7 +1,7 @@
 name: amplified_server
 description: A server amplifying user voices
-version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+version: 1.0.1
+# repository: https://github.com/jirisemecky/amplified-server
 
 environment:
   sdk: ^3.0.5
@@ -15,6 +15,7 @@ dependencies:
   envify:
   shelf_router: ^1.1.0
   dart_openai: ^3.0.0
+  prometheus_client: ^1.0.0+1
 
 dev_dependencies:
   http: ^0.13.0
