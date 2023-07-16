@@ -2,36 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dart_openai/dart_openai.dart';
-import 'package:prometheus_client/prometheus_client.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:pinecone/pinecone.dart';
 
-import 'package:prometheus_client/format.dart' as format;
-import 'package:prometheus_client/runtime_metrics.dart' as runtime_metrics;
 
 import 'embeddings.dart';
 import 'env.dart';
-
-/// Collector for metrics.
-class Metrics {
-  late Counter requestCounter;
-
-  Metrics() {
-    runtime_metrics.register();
-    requestCounter = Counter(name: 'number_of_requests',
-        help: 'Counts the number of requests to fetch reviews');
-  }
-
-  Future<String> serialize() async {
-    final buffer = StringBuffer();
-    // TODO: this is not returning the metric that I'm writing to, only some default ones.
-    final metrics = await CollectorRegistry.defaultRegistry.collectMetricFamilySamples();
-    format.write004(buffer, metrics);
-    return(buffer.toString());
-  }
-}
+import 'metrics.dart';
 
 /// The server
 class AmplifiedServer {
@@ -40,6 +19,8 @@ class AmplifiedServer {
   static const String pineconeIndex = 'openai';
   static const String pineconeProject = '9606be2';
   static const String pineconeNamespace = 'withsource2';
+
+  static final embeddings = EmbeddingsFetcher();
   static final pinecone = PineconeClient(apiKey: Env.pineconeKey);
 
   Metrics metrics = Metrics();
@@ -49,10 +30,9 @@ class AmplifiedServer {
 
   AmplifiedServer(this.ip, this.port) {
     // Configure routes.
-   var _router = Router()
-      ..get('/', _requestHandler)
-      ..get('/metrics', _metricsHandler)
-      ..get('/status', _statusHandler);
+    var _router = Router()
+      ..get('/', _requestHandler)..get('/metrics', metrics.requestHandler)..get(
+          '/status', _statusHandler);
 
     // Configure a pipeline that logs requests.
     _handler = Pipeline().addMiddleware(logRequests()).addHandler(_router);
@@ -65,14 +45,13 @@ class AmplifiedServer {
 
   Response _statusHandler(Request request) => Response.ok('OK');
 
-  Future<Response> _metricsHandler(Request _) async => Response.ok(await metrics.serialize());
-
   Future<Response> _requestHandler(Request request) async {
+    final stopwatch = Stopwatch()..start();
     var query = request.url.queryParameters['q'];
-
     print('Responding to query "$query"...');
+    metrics.requestCounter.inc();
 
-    var queryVector = await EmbeddingsFetcher().get(query);
+    var queryVector = await embeddings.get(query);
 
     QueryResponse? queryResponse = await pinecone.queryVectors(
         indexName: pineconeIndex,
@@ -83,6 +62,8 @@ class AmplifiedServer {
 
     var jsonString = jsonEncode(queryResponse);
 
+    metrics.requestLatency.observe(stopwatch.elapsedMilliseconds.toDouble());
+    stopwatch.stop();
     return Response.ok(jsonString, headers: {"Access-Control-Allow-Origin": "*"});
   }
 }
