@@ -17,19 +17,19 @@ dart run build_runner build
 ```
 
 ## Running with the Dart SDK
-PINECONE_NAMESPACE
+
 You can run the example with the [Dart SDK](https://dart.dev/get-dart)
 like this:
 
 ```
-$ dart run bin/server.dart
+$ dart run
 Server listening on port 8080
 ```
 
 And then from a second terminal:
 ```
-$ curl http://0.0.0.0:8080
-....
+$ curl http://0.0.0.0:8080/?q=tesla
+....json...
 
 $ curl http://0.0.0.0:8080/status
 OK
