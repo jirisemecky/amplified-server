@@ -3,6 +3,19 @@ configured to enable running with [Docker](https://www.docker.com/).
 
 # Running the sample
 
+## Regenerate Envied data
+
+Envied contains constant keys to OpenAI and Pinecone.
+The secret information is stored in `.env` file in the root of the project and is not submitted to
+the repository. To generate the relevant constant, either the `.env` file needs to exist or the
+constants must be defined as environmental variables.
+
+To regenerate the code:
+
+```shell
+dart run build_runner build
+```
+
 ## Running with the Dart SDK
 PINECONE_NAMESPACE
 You can run the example with the [Dart SDK](https://dart.dev/get-dart)
