@@ -14,12 +14,6 @@ import 'metrics.dart';
 
 /// The server
 class AmplifiedServer {
-  static const String apiKey = 'e15b46a4-0176-4294-b795-f31cae1ec327';
-  static const String environment = 'us-west4-gcp-free';
-  static const String pineconeIndex = 'openai';
-  static const String pineconeProject = '9606be2';
-  static const String pineconeNamespace = 'withsource2';
-
   static final embeddings = EmbeddingsFetcher();
   static final pinecone = PineconeClient(apiKey: Env.pineconeKey);
 
@@ -54,11 +48,11 @@ class AmplifiedServer {
     var queryVector = await embeddings.get(query);
 
     QueryResponse? queryResponse = await pinecone.queryVectors(
-        indexName: pineconeIndex,
-        projectId: pineconeProject,
-        environment: environment,
+        indexName: Env.pineconeIndex,
+        projectId: Env.pineconeProject,
+        environment: Env.pineconeEnvironment,
         request: QueryRequest(
-            vector: queryVector, includeMetadata: true, namespace: pineconeNamespace, topK: 8));
+            vector: queryVector, includeMetadata: true, namespace: Env.pineconeNamespace, topK: Env.numberOfResults));
 
     var jsonString = jsonEncode(queryResponse);
 

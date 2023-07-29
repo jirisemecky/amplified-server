@@ -1,5 +1,7 @@
 import 'package:dart_openai/dart_openai.dart';
 
+import 'env.dart';
+
 class EmbeddingsFetcher {
   static final Map<String, List<double>> _cache = {
     teslaQuery: _tesla,
@@ -4621,7 +4623,6 @@ class EmbeddingsFetcher {
     -0.007012609392404556,
     -0.02242163196206093
   ];
-  static const _defaultVector = _tesla;
 
   static const chevyQuery = 'chevy bolt value';
   static const machQuery = 'mach-e reliability';
@@ -4629,13 +4630,13 @@ class EmbeddingsFetcher {
 
   Future<List<double>> get(String? query) async {
     if (query == null) {
-      return _defaultVector;
+      throw 'No query provided';
     }
     if (_cache.containsKey(query)) {
       return _cache[query]!;
     }
     OpenAIEmbeddingsModel response =
-    await OpenAI.instance.embedding.create(model: 'text-embedding-ada-002', input: query);
+    await OpenAI.instance.embedding.create(model: Env.openAIModel, input: query);
     if (response.data.isEmpty) throw 'No embeddings returned';
     var data = response.data[0];
     if (data.embeddings.isEmpty) throw 'Embeddings returned but they are empty';
