@@ -2,7 +2,7 @@ import 'package:envied/envied.dart';
 
 part 'env.g.dart';
 
-@Envied(requireEnvFile: true, path: '/home/jirka/projekty/amplified-server/bin/.env')
+@Envied(requireEnvFile: true)
 abstract class Env {
   @EnviedField(varName: 'OPENAI_KEY')
   static const String openAIKey = _Env.openAIKey;
