@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:http/http.dart';
 import 'package:test/test.dart';
 
+import '../bin/embeddings.dart';
+
 void main() {
   final port = '8080';
   final host = 'http://0.0.0.0:$port';
@@ -21,21 +23,21 @@ void main() {
   tearDown(() => p.kill());
 
   test('Root', () async {
-    final response = await get(Uri.parse('$host/'));
+    final response = await get(Uri.parse('$host/?q=${EmbeddingsFetcher.chevyQuery}'));
     expect(response.statusCode, 200);
     expect(response.body, isNotEmpty);
+  });
+
+  test('No query', () async {
+    final response = await get(Uri.parse('$host'));
+    expect(response.statusCode, 400);
+    expect(response.body, contains('ERROR'));
   });
 
   test('Status', () async {
     final response = await get(Uri.parse('$host/status'));
     expect(response.statusCode, 200);
     expect(response.body, 'OK');
-  });
-
-  test('Status hello', () async {
-    final response = await get(Uri.parse('$host/status/hello'));
-    expect(response.statusCode, 200);
-    expect(response.body, 'OK: hello');
   });
 
   test('404', () async {

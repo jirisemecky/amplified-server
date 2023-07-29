@@ -7,7 +7,6 @@ import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:pinecone/pinecone.dart';
 
-
 import 'embeddings.dart';
 import 'env.dart';
 import 'metrics.dart';
@@ -25,8 +24,9 @@ class AmplifiedServer {
   AmplifiedServer(this.ip, this.port) {
     // Configure routes.
     var _router = Router()
-      ..get('/', _requestHandler)..get('/metrics', metrics.requestHandler)..get(
-          '/status', _statusHandler);
+      ..get('/', _requestHandler)
+      ..get('/metrics', metrics.requestHandler)
+      ..get('/status', _statusHandler);
 
     // Configure a pipeline that logs requests.
     _handler = Pipeline().addMiddleware(logRequests()).addHandler(_router);
@@ -45,20 +45,28 @@ class AmplifiedServer {
     print('Responding to query "$query"...');
     metrics.requestCounter.inc();
 
-    var queryVector = await embeddings.get(query);
+    try {
+      var queryVector = await embeddings.get(query);
 
-    QueryResponse? queryResponse = await pinecone.queryVectors(
-        indexName: Env.pineconeIndex,
-        projectId: Env.pineconeProject,
-        environment: Env.pineconeEnvironment,
-        request: QueryRequest(
-            vector: queryVector, includeMetadata: true, namespace: Env.pineconeNamespace, topK: Env.numberOfResults));
+      QueryResponse? queryResponse = await pinecone.queryVectors(
+          indexName: Env.pineconeIndex,
+          projectId: Env.pineconeProject,
+          environment: Env.pineconeEnvironment,
+          request: QueryRequest(
+              vector: queryVector,
+              includeMetadata: true,
+              namespace: Env.pineconeNamespace,
+              topK: Env.numberOfResults));
 
-    var jsonString = jsonEncode(queryResponse);
+      var jsonString = jsonEncode(queryResponse);
 
-    metrics.requestLatency.observe(stopwatch.elapsedMilliseconds.toDouble());
-    stopwatch.stop();
-    return Response.ok(jsonString, headers: {"Access-Control-Allow-Origin": "*"});
+      metrics.requestLatency.observe(stopwatch.elapsedMilliseconds.toDouble());
+      stopwatch.stop();
+      return Response.ok(jsonString, headers: {"Access-Control-Allow-Origin": "*"});
+    } catch (e) {
+      metrics.errorCounter.inc();
+      return Response.badRequest(body: 'ERROR: $e', headers: {"Access-Control-Allow-Origin": "*"});
+    }
   }
 }
 

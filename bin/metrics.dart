@@ -6,13 +6,15 @@ import 'package:shelf/shelf.dart';
 /// Collector for metrics.
 class Metrics {
   late Counter requestCounter;
+  late Counter errorCounter;
   late Histogram requestLatency;
 
   Metrics() {
     runtime_metrics.register();
     requestCounter =
-        Counter(name: 'number_of_requests', help: 'Counts the number of requests to fetch reviews')
+        Counter(name: 'requests', help: 'Counts the number of requests to fetch reviews')
           ..register();
+    errorCounter = Counter(name: 'errors', help: 'Counter of failed requests')..register();
     requestLatency = Histogram.exponential(
         name: 'request_latency',
         help: 'Latency of request fetching amplify data.',
