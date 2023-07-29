@@ -4,6 +4,6 @@ build/
 .dart_tool/
 .git/
 .github/
-.gitignore
+.env
 .idea/
 .packages
