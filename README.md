@@ -9,35 +9,41 @@ Envied contains constant keys to OpenAI and Pinecone.
 The secret information is stored in `.env` file in the root of the project and is not submitted to
 the repository.
 
-## Running with the Dart SDK
+## Running locally with the Dart SDK
 
-You can run the example with the [Dart SDK](https://dart.dev/get-dart)
-like this:
-
-```
+```shell
 $ dart run
-Server listening on port 8080
 ```
+... prints `Server listening on port 8080`.
 
-And then from a second terminal:
-```
-$ curl http://0.0.0.0:8080/?q=tesla
-....json...
 
-$ curl http://0.0.0.0:8080/status
-OK
-```
+And then test the following URL:
+`http://0.0.0.0:8080/?q=tesla`
 
-## Running with Docker
+## Running locally with Docker
 
 If you have [Docker Desktop](https://www.docker.com/get-started) installed, you
 can build and run with the `docker` command:
 
+```shell
+$ docker build . -t amplifyserver
+$ docker run -it -p 8080:8080 amplifyserver
 ```
-$ docker build . -t myserver
-$ docker run -it -p 8080:8080 myserver
-Server listening on port 8080
+... prints `Server listening on port 8080`.
+
+## Deploying to Google Cloud
+```shell
+gcloud run deploy
 ```
+
+Progress of the build is trackable in Cloud Build:
+https://console.cloud.google.com/cloud-build/builds
+
+Logs from running server are trackable in Logs Explorer:
+https://console.cloud.google.com/logs/
+
+Alternatively, run the trigger in 
+https://console.cloud.google.com/cloud-build/triggers?project=amplifyservertest
 
 # References
 
