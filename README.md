@@ -7,14 +7,7 @@ configured to enable running with [Docker](https://www.docker.com/).
 
 Envied contains constant keys to OpenAI and Pinecone.
 The secret information is stored in `.env` file in the root of the project and is not submitted to
-the repository. To generate the relevant constant, either the `.env` file needs to exist or the
-constants must be defined as environmental variables.
-
-To regenerate the code:
-
-```shell
-dart run build_runner build
-```
+the repository.
 
 ## Running with the Dart SDK
 
