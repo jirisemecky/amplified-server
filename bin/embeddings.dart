@@ -1,6 +1,6 @@
 import 'package:dart_openai/dart_openai.dart';
 
-import 'env.dart';
+import 'config.dart';
 
 class EmbeddingsFetcher {
   static final Map<String, List<double>> _cache = {
@@ -4636,7 +4636,7 @@ class EmbeddingsFetcher {
       return _cache[query]!;
     }
     OpenAIEmbeddingsModel response =
-    await OpenAI.instance.embedding.create(model: Env.openAIModel, input: query);
+    await OpenAI.instance.embedding.create(model: Config.openAIModel, input: query);
     if (response.data.isEmpty) throw 'No embeddings returned';
     var data = response.data[0];
     if (data.embeddings.isEmpty) throw 'Embeddings returned but they are empty';

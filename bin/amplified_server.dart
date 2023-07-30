@@ -7,6 +7,7 @@ import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:pinecone/pinecone.dart';
 
+import 'config.dart';
 import 'embeddings.dart';
 import 'env.dart';
 import 'metrics.dart';
@@ -14,14 +15,15 @@ import 'metrics.dart';
 /// The server
 class AmplifiedServer {
   static final embeddings = EmbeddingsFetcher();
-  static final pinecone = PineconeClient(apiKey: Env.pineconeKey);
+  late final PineconeClient pinecone;
 
   Metrics metrics = Metrics();
   InternetAddress ip;
   int port;
+  Env env;
   late final Handler _handler;
 
-  AmplifiedServer(this.ip, this.port) {
+  AmplifiedServer(this.ip, this.port, this.env) {
     // Configure routes.
     var _router = Router()
       ..get('/', _requestHandler)
@@ -30,6 +32,7 @@ class AmplifiedServer {
 
     // Configure a pipeline that logs requests.
     _handler = Pipeline().addMiddleware(logRequests()).addHandler(_router);
+    pinecone = PineconeClient(apiKey: env.pineconeKey);
   }
 
   void start() async {
@@ -49,14 +52,14 @@ class AmplifiedServer {
       var queryVector = await embeddings.get(query);
 
       QueryResponse? queryResponse = await pinecone.queryVectors(
-          indexName: Env.pineconeIndex,
-          projectId: Env.pineconeProject,
-          environment: Env.pineconeEnvironment,
+          indexName: Config.pineconeIndex,
+          projectId: Config.pineconeProject,
+          environment: Config.pineconeEnvironment,
           request: QueryRequest(
               vector: queryVector,
               includeMetadata: true,
-              namespace: Env.pineconeNamespace,
-              topK: Env.numberOfResults));
+              namespace: Config.pineconeNamespace,
+              topK: Config.numberOfResults));
 
       var jsonString = jsonEncode(queryResponse);
 
@@ -71,7 +74,8 @@ class AmplifiedServer {
 }
 
 void main(List<String> args) async {
-  OpenAI.apiKey = Env.openAIKey;
+  Env env = Env();
+  OpenAI.apiKey = env.openAIKey;
 
   // Use any available host or container IP (usually `0.0.0.0`).
   final ip = InternetAddress.anyIPv4;
@@ -79,6 +83,6 @@ void main(List<String> args) async {
   // For running in containers, we respect the PORT environment variable.
   final port = int.parse(Platform.environment['PORT'] ?? '4040');
 
-  final server = AmplifiedServer(ip, port);
+  final server = AmplifiedServer(ip, port, env);
   server.start();
 }
